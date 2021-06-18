@@ -7,14 +7,14 @@ description:
   key types. Each value in the bimap is associated with exactly one
   value of the opposite type.
 category:            Data
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 copyright:           Stuart Cook and contributors 2008, Joel Williamson 2015
 author:              Stuart Cook and contributors 2008, Joel Williamson 2015
 maintainer:          Joel Williamson <joel@joelwilliamson.ca>
 homepage:            https://github.com/joelwilliamson/bimap
 build-type:          Simple
-tested-with:         GHC <= 8.6.4 && >= 7.0
+tested-with:         GHC <= 8.10 && >= 7.0
 extra-source-files:
     HISTORY
 
@@ -24,11 +24,13 @@ Library
     build-depends: ghc-prim
   extensions:          DeriveDataTypeable
   ghc-options:         -Wall
+  hs-source-dirs:      lib
   exposed-modules:
       Data.Bimap
 
 test-suite tests
     type:            exitcode-stdio-1.0
+    hs-source-dirs:  test
     main-is:         Test/RunTests.hs
     other-modules:   Test.Tests
                      Test.Util
@@ -37,7 +39,8 @@ test-suite tests
                      deepseq,
                      exceptions,
                      QuickCheck >= 2 && < 3,
-                     template-haskell >= 2 && < 3
+                     template-haskell >= 2 && < 3,
+                     bimap
     if impl(ghc < 7.6.1)
       build-depends: ghc-prim
   extensions:        DeriveDataTypeable

@@ -134,16 +134,19 @@ instance (Ord a, Ord b) => Ord (Bimap a b) where
 instance (NFData a, NFData b) => NFData (Bimap a b)
 
 #if __GLASGOW_HASKELL__ >= 708
+{-|@since 3.3-}
 instance (Ord a, Ord b) => GHCExts.IsList (Bimap a b) where
     type Item (Bimap a b) = (a, b)
     fromList = fromList
     toList = toList
 #endif
 
+{-|@since 4.1-}
 instance Foldable (Bimap a) where
     foldr f i (MkBimap l _) = foldr f i l
     foldMap f (MkBimap l _) = foldMap f l
 
+{-|@since 4.1-}
 instance Bifoldable Bimap where
     bifoldMap f g (MkBimap l r) = foldMap f r <> foldMap g l
 
@@ -157,40 +160,48 @@ data BimapException = KeyNotFound String
 instance Exception BimapException
 
 {-| /O(1)/. The empty bimap.
-/Version: 0.2/-}
+
+@since 0.2-}
 empty :: Bimap a b
 empty = MkBimap M.empty M.empty
 
 {-| /O(1)/. A bimap with a single element.
-/Version: 0.2/-}
+
+@since 0.2-}
 singleton :: a -> b -> Bimap a b
 singleton x y = MkBimap (M.singleton x y) (M.singleton y x)
 
 {-| /O(1)/. Is the bimap empty?
-/Version: 0.2/-}
+
+@since 0.2-}
 null :: Bimap a b -> Bool
 null (MkBimap left _) = M.null left
 
 {-| /O(1)/. The number of elements in the bimap.
-/Version: 0.2/-}
+
+@since 0.2-}
 size :: Bimap a b -> Int
 size (MkBimap left _) = M.size left
 
 {-| /O(log n)/. Is the specified value a member of the bimap?
-/Version: 0.2/-}
+
+@since 0.2-}
 member :: (Ord a, Ord b) => a -> Bimap a b -> Bool
 member x (MkBimap left _) = M.member x left
 {-| /O(log n)/. A version of 'member' specialized to the right key.
-/Version: 0.2/-}
+
+@since 0.2-}
 memberR :: (Ord a, Ord b) => b -> Bimap a b -> Bool
 memberR y (MkBimap _ right) = M.member y right
 
 {-| /O(log n)/. Is the specified value not a member of the bimap?
-/Version: 0.2/-}
+
+@since 0.2-}
 notMember :: (Ord a, Ord b) => a -> Bimap a b -> Bool
 notMember = not .: member
 {-| /O(log n)/. A version of 'notMember' specialized to the right key.
-/Version: 0.2/-}
+
+@since 0.2-}
 notMemberR :: (Ord a, Ord b) => b -> Bimap a b -> Bool
 notMemberR = not .: memberR
 
@@ -200,7 +211,7 @@ Are the two values associated /with each other/ in the bimap?
 This function is uncurried in its first two arguments, so that it
 can be used infix.
 
-/Version: 0.2/-}
+@since 0.2-}
 pairMember :: (Ord a, Ord b)
            => (a, b) -> Bimap a b -> Bool
 pairMember (x, y) (MkBimap left _) =
@@ -209,7 +220,8 @@ pairMember (x, y) (MkBimap left _) =
 {-| /O(log n)/.
 Are the two values not in the bimap, or not associated
 with each other? (Complement of 'pairMember'.)
-/Version: 0.2/-}
+
+@since 0.2-}
 pairNotMember :: (Ord a, Ord b)
               => (a, b) -> Bimap a b -> Bool
 pairNotMember = not .: pairMember
@@ -220,7 +232,7 @@ Insert a pair of values into the bimap, associating them.
 If either of the values is already in the bimap, any overlapping
 bindings are deleted.
 
-/Version: 0.2/-}
+@since 0.2-}
 insert :: (Ord a, Ord b)
        => a -> b -> Bimap a b -> Bimap a b
 insert x y = delete x >>> deleteR y >>> unsafeInsert x y
@@ -230,7 +242,8 @@ insert x y = delete x >>> deleteR y >>> unsafeInsert x y
 {-| /O(log n)/.
 Insert a pair of values into the bimap, but only if neither is
 already in the bimap.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 tryInsert :: (Ord a, Ord b)
           => a -> b -> Bimap a b -> Bimap a b
 tryInsert x y bi
@@ -267,12 +280,13 @@ Delete a value and its twin from a bimap.
 When the value is not a member of the bimap, the original bimap is
 returned.
 
-/Version: 0.2/-}
+@since 0.2-}
 delete :: (Ord a, Ord b) => a -> Bimap a b -> Bimap a b
 delete = deleteE . Left
 
 {-| /O(log n)/ A version of 'delete' specialized to the right key.
-/Version: 0.2/-}
+
+@since 0.2-}
 deleteR :: (Ord a, Ord b) => b -> Bimap a b -> Bimap a b
 deleteR = deleteE . Right
 
@@ -356,7 +370,7 @@ Lookup a left key in the bimap, returning the associated right key.
 This function will @return@ the result in the monad, or @fail@ if
 the value isn't in the bimap.
 
-/Version: 0.2/-}
+@since 0.2-}
 lookup :: (Ord a, Ord b, MonadThrow m)
        => a -> Bimap a b -> m b
 lookup x (MkBimap left _) =
@@ -367,7 +381,8 @@ lookup x (MkBimap left _) =
 {-| /O(log n)/.
 A version of 'lookup' that is specialized to the right key,
 and returns the corresponding left key.
-/Version: 0.2/-}
+
+@since 0.2-}
 lookupR :: (Ord a, Ord b, MonadThrow m)
         => b -> Bimap a b -> m a
 lookupR y (MkBimap _ right) =
@@ -378,21 +393,24 @@ lookupR y (MkBimap _ right) =
 {-| /O(log n)/.
 Find the right key corresponding to a given left key.
 Calls @'error'@ when the key is not in the bimap.
-/Version: 0.2/-}
+
+@since 0.2-}
 (!) :: (Ord a, Ord b) => Bimap a b -> a -> b
 (!) bi x = fromMaybe (error "Data.Bimap.(!): Left key not found") $ lookup x bi
 
 {-| /O(log n)/.
 A version of @(!)@ that is specialized to the right key,
 and returns the corresponding left key.
-/Version: 0.2/-}
+
+@since 0.2-}
 (!>) :: (Ord a, Ord b) => Bimap a b -> b -> a
 (!>) bi y = fromMaybe (error "Data.Bimap.(!>): Right key not found") $ lookupR y bi
 
 {-| /O(n*log n)/.
 Build a map from a list of pairs. If there are any overlapping
 pairs in the list, the later ones will override the earlier ones.
-/Version: 0.2/-}
+
+@since 0.2-}
 fromList :: (Ord a, Ord b)
          => [(a, b)] -> Bimap a b
 fromList = foldl' (flip . uncurry $ insert) empty
@@ -408,13 +426,14 @@ Note that when duplicates occur in both the keys and in the values,
 @fromList xs /= fromAList (reverse xs)@. However, if either
 contains no duplicates, then the equality holds.
 
-/Version: 0.2.2/-}
+@since 0.2.2-}
 fromAList :: (Ord a, Ord b)
           => [(a, b)] -> Bimap a b
 fromAList = foldl' (flip . uncurry $ tryInsert) empty
 
 {-| /O(n)/. Convert to a list of associated pairs.
-/Version: 0.2/-}
+
+@since 0.2-}
 toList :: Bimap a b -> [(a, b)]
 toList = toAscList
 
@@ -423,7 +442,7 @@ and @snd@ halves of the list are in strictly ascending order.
 
 This precondition is checked; an invalid list will cause an error.
 
-/Version: 0.2.3/-}
+@since 0.2.3-}
 fromAscPairList :: (Ord a, Ord b)
                 => [(a, b)] -> Bimap a b
 fromAscPairList xs
@@ -449,7 +468,7 @@ and @snd@ halves of the list are in strictly ascending order.
 This precondition is /not/ checked; an invalid list will produce a
 malformed bimap.
 
-/Version: 0.2.3/-}
+@since 0.2.3-}
 fromAscPairListUnchecked :: (Ord a, Ord b)
                          => [(a, b)] -> Bimap a b
 fromAscPairListUnchecked xs = MkBimap
@@ -465,7 +484,7 @@ values in ascending order.
 Since pair ordering is lexical, the pairs will also be in
 ascending order.
 
-/Version: 0.2/-}
+@since 0.2-}
 toAscList :: Bimap a b -> [(a, b)]
 toAscList (MkBimap left _) = M.toList left
 
@@ -476,41 +495,47 @@ values first in the pair and in ascending order.
 Since pair ordering is lexical, the pairs will also be in
 ascending order.
 
-/Version: 0.2/-}
+@since 0.2-}
 toAscListR :: Bimap a b -> [(b, a)]
 toAscListR = toAscList . twist
 
 {-| /O(n)/.
 Return all associated pairs in the bimap, with the left-hand
 values in ascending order.
-/Version: 0.2/-}
+
+@since 0.2-}
 assocs :: Bimap a b -> [(a, b)]
 assocs = toList
 
 {-| /O(n)/.
 Return all left-hand keys in the bimap in ascending order.
-/Version: 0.2/-}
+
+@since 0.2-}
 keys :: Bimap a b -> [a]
 keys (MkBimap left _) = M.keys left
 
 {-| /O(n)/.
 Return all right-hand keys in the bimap in ascending order.
-/Version: 0.2/-}
+
+@since 0.2-}
 keysR :: Bimap a b -> [b]
 keysR (MkBimap _ right) = M.keys right
 
 {-| /O(n)/. An alias for 'keysR'.
-/Version: 0.2/-}
+
+@since 0.2-}
 elems :: Bimap a b -> [b]
 elems = keysR
 
 {-| /O(1)/. Extract only the left-to-right component of a bimap.
-/Version: 0.2.1/-}
+
+@since 0.2.1-}
 toMap :: Bimap a b -> M.Map a b
 toMap (MkBimap left _) = left
 
 {-| /O(1)/. Extract only the right-to-left component of a bimap.
-/Version: 0.2.1/-}
+
+@since 0.2.1-}
 toMapR :: Bimap a b -> M.Map b a
 toMapR (MkBimap _ right) = right
 
@@ -520,7 +545,7 @@ Filter all association pairs that satisfy the predicate.
 Note that the predicate will be applied /twice/ for each association
 in the bimap.
 
-/Version: 0.2.4/-}
+@since 0.2.4-}
 filter :: (Ord a, Ord b)
               => (a -> b -> Bool) -> Bimap a b -> Bimap a b
 filter pred (MkBimap left right) =
@@ -536,7 +561,7 @@ the second contains all associations that fail the predicate.
 Note that the predicate will be applied /twice/ for each association
 in the bimap.
 
-/Version: 0.2.4/-}
+@since 0.2.4-}
 partition :: (Ord a, Ord b)
           => (a -> b -> Bool) -> Bimap a b -> (Bimap a b, Bimap a b)
 partition pred (MkBimap left right) =
@@ -550,7 +575,8 @@ partition pred (MkBimap left right) =
 Test if the internal bimap structure is valid. This should be true
 for any bimap created using the public interface, unless
 'fromAscPairListUnchecked' has been used inappropriately.
-/Version: 0.2/-}
+
+@since 0.2-}
 valid :: (Ord a, Ord b)
       => Bimap a b -> Bool
 valid (MkBimap left right) = and
@@ -564,34 +590,39 @@ valid (MkBimap left right) = and
 
 {-| /O(1)/.
 Reverse the positions of the two element types in the bimap.
-/Version: 0.2/-}
+
+@since 0.2-}
 twist ::  Bimap a b -> Bimap b a
 twist (MkBimap left right) = MkBimap right left
 
 {-| /O(1)/.
 Reverse the positions of the two element types in a bimap
 transformation.
-/Version: 0.2/-}
+
+@since 0.2-}
 twisted :: (Bimap a b -> Bimap a b) -> (Bimap b a -> Bimap b a)
 twisted f = twist . f . twist
 
 {-| /O(n)/.
 Fold the association pairs in the map, such that
 @'fold' f z == 'foldr' f z . 'assocs'@.
-/Version: 0.2/-}
+
+@since 0.2-}
 fold :: (a -> b -> c -> c) -> c -> Bimap a b -> c
 fold f z = foldr (uncurry f) z . assocs
 
 {-| /O(n*log n)/
 Map a function over all the left keys in the map.
-/Version 0.3/-}
+
+@since 0.3-}
 map :: Ord c => (a -> c) -> Bimap a b -> Bimap c b
 map f (MkBimap left right) =
     MkBimap (M.mapKeys f left) (M.map f right)
 
 {-| /O(n*log n)/
 Map a function over all the right keys in the map.
-/Version 0.3/-}
+
+@since 0.3-}
 mapR :: Ord c => (b -> c) -> Bimap a b -> Bimap a c
 mapR f (MkBimap left right) =
     MkBimap (M.map f left) (M.mapKeys f right)
@@ -599,7 +630,8 @@ mapR f (MkBimap left right) =
 {-| /O(n)/.
 Map a strictly increasing function over all left keys in the map.
 /The precondition is not checked./
-/Version 0.3/-}
+
+@since 0.3-}
 mapMonotonic :: (a -> c) -> Bimap a b -> Bimap c b
 mapMonotonic f (MkBimap left right) =
     MkBimap (M.mapKeysMonotonic f left) (M.map f right)
@@ -607,7 +639,8 @@ mapMonotonic f (MkBimap left right) =
 {-| /O(n)/.
 Map a strictly increasing function over all right keys in the map.
 /The precondition is not checked./
-/Version 0.3/-}
+
+@since 0.3-}
 mapMonotonicR :: (b -> c) -> Bimap a b -> Bimap a c
 mapMonotonicR f (MkBimap left right) =
     MkBimap (M.map f left) (M.mapKeysMonotonic f right)
@@ -615,7 +648,8 @@ mapMonotonicR f (MkBimap left right) =
 {-| /O(log n)/.
 Delete and find the element with maximal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteFindMax :: (Ord b) => Bimap a b -> ((a, b), Bimap a b)
 deleteFindMax (MkBimap left right) = ((a, b), MkBimap left' right') where
     ((a, b), left') = M.deleteFindMax left
@@ -624,7 +658,8 @@ deleteFindMax (MkBimap left right) = ((a, b), MkBimap left' right') where
 {-| /O(log n)/.
 Delete and find the element with maximal right key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteFindMaxR :: (Ord a) => Bimap a b ->  ((b, a), Bimap a b)
 deleteFindMaxR = second twist . deleteFindMax . twist where
     second f (x, y) = (x, f y)
@@ -632,21 +667,24 @@ deleteFindMaxR = second twist . deleteFindMax . twist where
 {-| /O(log n)/.
 Delete the element with maximal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteMax :: (Ord b) => Bimap a b -> Bimap a b
 deleteMax = snd . deleteFindMax
 
 {-| /O(log n)/.
 Delete the element with maximal right key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteMaxR :: (Ord a) => Bimap a b -> Bimap a b
 deleteMaxR = snd . deleteFindMaxR
 
 {-| /O(log n)/.
 Find the element with maximal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 findMax :: Bimap a b -> (a, b)
 findMax = M.findMax . toMap
 
@@ -654,14 +692,16 @@ findMax = M.findMax . toMap
 Find the element with maximal right key. The
 right-hand key is the first entry in the pair.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 findMaxR :: Bimap a b -> (b, a)
 findMaxR = M.findMax . toMapR
 
 {-| /O(log n)/.
 Delete and find the element with minimal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteFindMin :: (Ord b) => Bimap a b -> ((a, b), Bimap a b)
 deleteFindMin (MkBimap left right) = ((a, b), MkBimap left' right') where
     ((a, b), left') = M.deleteFindMin left
@@ -670,7 +710,8 @@ deleteFindMin (MkBimap left right) = ((a, b), MkBimap left' right') where
 {-| /O(log n)/.
 Delete and find the element with minimal right key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteFindMinR :: (Ord a) => Bimap a b ->  ((b, a), Bimap a b)
 deleteFindMinR = second twist . deleteFindMin . twist where
     second f (x, y) = (x, f y)
@@ -678,21 +719,24 @@ deleteFindMinR = second twist . deleteFindMin . twist where
 {-| /O(log n)/.
 Delete the element with minimal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteMin :: (Ord b) => Bimap a b -> Bimap a b
 deleteMin = snd . deleteFindMin
 
 {-| /O(log n)/.
 Delete the element with minimal right key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 deleteMinR :: (Ord a) => Bimap a b -> Bimap a b
 deleteMinR = snd . deleteFindMinR
 
 {-| /O(log n)/.
 Find the element with minimal left key.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 findMin :: Bimap a b -> (a, b)
 findMin = M.findMin . toMap
 
@@ -700,6 +744,7 @@ findMin = M.findMin . toMap
 Find the element with minimal right key. The
 right-hand key is the first entry in the pair.
 Calls @'error'@ if the bimap is empty.
-/Version: 0.2.2/-}
+
+@since 0.2.2-}
 findMinR :: Bimap a b -> (b, a)
 findMinR = M.findMin . toMapR

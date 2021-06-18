@@ -94,13 +94,15 @@ module Data.Bimap (
 ) where
 
 import           Control.DeepSeq     (NFData)
-import           Control.Monad.Catch
+import           Control.Monad.Catch ( Exception, MonadThrow(..) )
 
 import           Data.Function       (on)
 import           Data.List           (foldl', sort)
 import qualified Data.Map            as M
 import           Data.Maybe          (fromMaybe)
-import           Data.Typeable
+import           Data.Typeable       (Typeable)
+import           Data.Foldable       ()
+import           Data.Bifoldable     (Bifoldable, bifoldMap)
 
 #if __GLASGOW_HASKELL__ >= 708
 import qualified GHC.Exts            as GHCExts
@@ -137,6 +139,14 @@ instance (Ord a, Ord b) => GHCExts.IsList (Bimap a b) where
     fromList = fromList
     toList = toList
 #endif
+
+instance Foldable (Bimap a) where
+    foldr f i (MkBimap l _) = foldr f i l
+    foldMap f (MkBimap l _) = foldMap f l
+
+instance Bifoldable Bimap where
+    bifoldMap f g (MkBimap l r) = foldMap f r <> foldMap g l
+
 
 {-|
 A 'Bimap' action failed.

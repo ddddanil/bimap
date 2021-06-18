@@ -96,13 +96,13 @@ module Data.Bimap (
 import           Control.DeepSeq     (NFData)
 import           Control.Monad.Catch ( Exception, MonadThrow(..) )
 
+import           Data.Bifoldable     (Bifoldable, bifoldMap)
 import           Data.Function       (on)
+import           Data.Functor.Classes ( Eq1(..), Ord1(..), Eq2(..), Ord2(..) )
 import           Data.List           (foldl', sort)
 import qualified Data.Map            as M
 import           Data.Maybe          (fromMaybe)
 import           Data.Typeable       (Typeable)
-import           Data.Foldable       ()
-import           Data.Bifoldable     (Bifoldable, bifoldMap)
 
 #if __GLASGOW_HASKELL__ >= 708
 import qualified GHC.Exts            as GHCExts
@@ -128,8 +128,24 @@ instance (Show a, Show b) => Show (Bimap a b) where
 instance (Eq a, Eq b) => Eq (Bimap a b) where
     (==) = (==) `on` toAscList
 
+{-|@since 4.1-}
+instance Eq k => Eq1 (Bimap k) where
+    liftEq f (MkBimap l1 _) (MkBimap l2 _) = liftEq f l1 l2
+
+{-|@since 4.1-}
+instance Eq2 Bimap where
+    liftEq2 f g (MkBimap l1 _) (MkBimap l2 _) = liftEq2 f g l1 l2
+
 instance (Ord a, Ord b) => Ord (Bimap a b) where
     compare = compare `on` toAscList
+
+{-|@since 4.1-}
+instance (Ord a) => Ord1 (Bimap a) where
+    liftCompare f (MkBimap l1 _) (MkBimap l2 _) = liftCompare f l1 l2
+
+{-|@since 4.1-}
+instance Ord2 Bimap where
+    liftCompare2 f g (MkBimap l1 _) (MkBimap l2 _) = liftCompare2 f g l1 l2
 
 instance (NFData a, NFData b) => NFData (Bimap a b)
 

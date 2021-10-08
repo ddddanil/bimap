@@ -36,7 +36,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.stack.ghc }}
           enable-stack: true
-      - run: stack build --system-ghc --resolver ${{ matrix.resolver }}
+      - run: stack build --system-ghc --resolver ${{ matrix.stack.resolver }}
   build-cabal:
     runs-on: ${{ matrix.os }}
     strategy:
